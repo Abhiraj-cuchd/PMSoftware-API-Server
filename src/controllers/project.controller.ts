@@ -13,13 +13,35 @@ export const getProjects = async (): Promise<Project[] | []> => {
     }
 };
 
-export const createProject = async (data: Project): Promise<Project | undefined> => {
+export const createProject = async (data: Omit<Project, 'id'>): Promise<Project | undefined> => {
     try {
-        const { name, startDate, endDate, description } = data;
-        const project: Project = await prisma.project.create({ data: { name, description, startDate, endDate } });
+        const { name, description, startDate, endDate } = data;
+
+        // Check for existing project to prevent duplicates
+        const existingProject = await prisma.project.findFirst({
+            where: {
+                name: name,
+                description: description
+            }
+        });
+
+        if (existingProject) {
+            console.log('Project already exists');
+            return existingProject;
+        }
+
+        const project = await prisma.project.create({
+            data: {
+                name,
+                description,
+                startDate,
+                endDate
+            }
+        });
+
         return project;
     } catch (error) {
-        console.log(error);
+        console.error('Error creating project:', error);
         return undefined;
     }
 }
