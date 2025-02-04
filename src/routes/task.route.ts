@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { createTasks, getTasks } from "../controllers/task.controller";
+import { createTasks, getTasks, updateTaskStatus } from "../controllers/task.controller";
 
 const route = Router();
 route.get('/', async (req: Request, res: Response): Promise<void> => {
@@ -43,6 +43,32 @@ route.post('/', async (req: Request, res: Response): Promise<void> => {
         }
     } catch (error) {
         console.log("Error Occured: ", error);
+        res.status(500).json({
+            isSuccess: false,
+            msg: "Internal Server Error"
+        })
+    }
+});
+
+route.patch('/:taskId', async (req: Request, res: Response) => {
+    try {
+        const { taskId }: any = req.params;
+        const { status }: any = req.body;
+        const updatedTask = await updateTaskStatus(taskId, status);
+        if (updatedTask) {
+            res.status(201).json({
+                isSuccess: true,
+                msg: "Task Updated",
+                updatedTask
+            });
+        } else {
+            res.status(400).json({
+                isSuccess: false,
+                msg: "Task Not Updated",
+            });
+        }
+    } catch (error: any) {
+        console.log(error.message)
         res.status(500).json({
             isSuccess: false,
             msg: "Internal Server Error"

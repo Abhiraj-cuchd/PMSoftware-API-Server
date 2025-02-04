@@ -52,3 +52,22 @@ export const createTasks = async (data: Omit<Task, 'id'>): Promise<Task | undefi
         return undefined;
     }
 }
+
+
+export const updateTaskStatus = async (taskId: number, status: string) => {
+    try {
+        console.log(taskId, 'taskId')
+        const updatedTask = await prisma.task.update({
+            where: {
+                id: Number(taskId)
+            },
+            data: {
+                status: status
+            }
+        });
+        return updatedTask;
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
